@@ -13,6 +13,9 @@ app.use("/api/auth", authRoutes);
 const roleRoutes = require("./routes/role.routes.js");
 app.use("/api/role", roleRoutes);
 
+const userRoleRoutes = require("./routes/user_role.routes.js");
+app.use("/api/user-role", userRoleRoutes);
+
 app.get("/", function (req, res) {
   res.send("Hello from maadeha");
 });

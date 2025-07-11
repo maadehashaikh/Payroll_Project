@@ -18,15 +18,14 @@ db.Role = require("../models/role.model.js")(sequelize, Sequelize);
 db.Menu = require("../models/menu.model.js")(sequelize, Sequelize);
 db.Privilege = require("../models/privilege.model.js")(sequelize, Sequelize);
 db.UserRole = require("../models/user_role.model.js")(sequelize, Sequelize);
-// Users ->  Roles
+
+// One User has one UserRole (bridge entry)
 db.User.hasOne(db.UserRole, { foreignKey: "userId" });
 db.UserRole.belongsTo(db.User, { foreignKey: "userId" });
 
-// Role → UserRole (One-to-Many)
+// One Role can be assigned to many users through UserRole
 db.Role.hasMany(db.UserRole, { foreignKey: "roleId" });
 db.UserRole.belongsTo(db.Role, { foreignKey: "roleId" });
-// db.Role.hasMany(db.User, { foreignKey: "roleId" });
-// db.User.belongsTo(db.Role, { foreignKey: "roleId" });
 
 db.Role.belongsToMany(db.Privilege, {
   through: "role_privileges",
