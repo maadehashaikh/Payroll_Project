@@ -16,9 +16,12 @@ app.use("/api/role", roleRoutes);
 const userRoleRoutes = require("./routes/user_role.routes.js");
 app.use("/api/user-role", userRoleRoutes);
 
-app.get("/", function (req, res) {
-  res.send("Hello from maadeha");
-});
+const privilegeRoutes = require("./routes/privilege.route.js");
+app.use("/api/privilege", privilegeRoutes);
+
+// app.get("/", function (req, res) {
+//   res.send("Hello from maadeha");
+// });
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
