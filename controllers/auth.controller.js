@@ -7,10 +7,14 @@ const jwt = require("jsonwebtoken");
 async function createUser(req, res) {
   const { name, email, password, confirmPassword } = req.body;
   if (!name || !email || !password || !confirmPassword) {
-    return res.status(400).json({ message: "All fields are required." });
+    return res
+      .status(400)
+      .json({ success: false, message: "All fields are required." });
   }
   if (password !== confirmPassword) {
-    return res.status(400).json({ message: "Passwords do not match." });
+    return res
+      .status(400)
+      .json({ success: false, message: "Passwords do not match." });
   }
   try {
     const existingUser = await User.findOne({ where: { email } });
@@ -31,8 +35,9 @@ async function createUser(req, res) {
     });
 
     res.status(201).json({
+      success: true,
       message: "User created successfully!",
-      user: {
+      data: {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
@@ -40,7 +45,9 @@ async function createUser(req, res) {
     });
   } catch (err) {
     console.error("Error in createUser:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: err.message });
   }
 }
 
@@ -53,11 +60,11 @@ async function getAllUsers(req, res) {
     res.status(200).json({
       success: true,
       message: "Users fetched successfully",
-      users,
+      data: users,
     });
   } catch (err) {
     console.error("Error fetching users:", err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 
@@ -68,23 +75,21 @@ async function updateUser(req, res) {
   try {
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found!" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
     }
-
-    // Update fields if provided
     if (name) user.name = name;
     if (email) user.email = email;
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       user.password = hashedPassword;
     }
-
     await user.save();
-
     res.status(200).json({
       success: true,
       message: "User updated successfully",
-      user: {
+      data: {
         id: user.id,
         name: user.name,
         email: user.email,
@@ -92,7 +97,7 @@ async function updateUser(req, res) {
     });
   } catch (err) {
     console.error("Update User Error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 
@@ -104,7 +109,9 @@ async function deleteUser(req, res) {
       return res.status(404).json({ message: "User not found." });
     }
     await user.destroy(); // If using `paranoid: true`, this will soft delete
-    res.status(200).json({ message: "User deleted successfully." });
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully." });
   } catch (err) {
     console.error("Delete user error:", err);
     res.status(500).json({ message: "Internal server error" });

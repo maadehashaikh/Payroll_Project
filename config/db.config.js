@@ -18,6 +18,10 @@ db.Role = require("../models/role.model.js")(sequelize, Sequelize);
 db.Menu = require("../models/menu.model.js")(sequelize, Sequelize);
 db.Privilege = require("../models/privilege.model.js")(sequelize, Sequelize);
 db.UserRole = require("../models/user_role.model.js")(sequelize, Sequelize);
+db.RolePrivilege = require("../models/role_privileges.model.js")(
+  sequelize,
+  Sequelize
+);
 
 // One User has one UserRole (bridge entry)
 db.User.hasOne(db.UserRole, { foreignKey: "userId" });
@@ -27,19 +31,21 @@ db.UserRole.belongsTo(db.User, { foreignKey: "userId" });
 db.Role.hasMany(db.UserRole, { foreignKey: "roleId" });
 db.UserRole.belongsTo(db.Role, { foreignKey: "roleId" });
 
+// Role ↔ Privilege (Many-to-Many through role_privileges)
+
 db.Role.belongsToMany(db.Privilege, {
-  through: "role_privileges",
+  through: db.RolePrivilege,
   foreignKey: "roleId",
 });
 db.Privilege.belongsToMany(db.Role, {
-  through: "role_privileges",
+  through: db.RolePrivilege,
   foreignKey: "privilegeId",
 });
 
-db.Privilege.belongsToMany(db.Menu, {
-  through: "privilege_menus",
-  foreignKey: "privilegeId",
-});
+// BelongsTo for bridge table querying
+db.RolePrivilege.belongsTo(db.Role, { foreignKey: "roleId" });
+db.RolePrivilege.belongsTo(db.Privilege, { foreignKey: "privilegeId" });
+
 db.Menu.belongsToMany(db.Privilege, {
   through: "privilege_menus",
   foreignKey: "menuId",

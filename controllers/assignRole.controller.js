@@ -6,7 +6,9 @@ async function assignRoleToUser(req, res) {
   const { roleId } = req.body;
 
   if (!roleId) {
-    return res.status(400).send({ message: "Role ID is required." });
+    return res
+      .status(400)
+      .send({ success: false, message: "Role ID is required." });
   }
 
   try {
@@ -14,18 +16,20 @@ async function assignRoleToUser(req, res) {
     const role = await Role.findByPk(roleId);
 
     if (!user || !role) {
-      return res.status(404).send({ message: "User or Role not found." });
+      return res
+        .status(404)
+        .send({ success: false, message: "User or Role not found." });
     }
 
     await UserRole.create({ userId, roleId });
     res.status(201).json({
+      success: true,
       message: "Role assigned to user.",
-      userId,
-      roleId,
+      data: { userId, roleId },
     });
   } catch (error) {
     console.error("Error assigning role:", error);
-    res.status(500).send({ message: "Internal server error." });
+    res.status(500).send({ success: false, message: "Internal server error." });
   }
 }
 
@@ -37,10 +41,13 @@ async function getAllUserRoles(req, res) {
         { model: Role, attributes: ["id", "name"] },
       ],
     });
-
-    res.status(200).json({ success: true, mappings });
+    res.status(200).json({
+      success: true,
+      message: "User roles retrieved successfully.",
+      data: mappings,
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 }
 
@@ -70,11 +77,13 @@ async function deleteUserRole(req, res) {
   try {
     const mapping = await UserRole.findOne({ where: { userId } });
     if (!mapping)
-      return res.status(404).json({ message: "Mapping not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Mapping not found." });
     await mapping.destroy();
     res.json({ success: true, message: "User role mapping deleted." });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 }
 
@@ -82,5 +91,5 @@ module.exports = {
   assignRoleToUser,
   getAllUserRoles,
   updateUserRole,
-  deleteUserRole
+  deleteUserRole,
 };

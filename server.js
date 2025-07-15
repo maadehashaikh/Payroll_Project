@@ -5,7 +5,7 @@ app.use(bodyParser.json());
 const db = require("./config/db.config.js");
 
 // create table if not exists
-db.sequelize.sync({ alter: true });
+db.sequelize.sync({ alert: true }); //alter: true
 
 const authRoutes = require("./routes/auth.routes.js");
 app.use("/api/auth", authRoutes);
@@ -18,6 +18,9 @@ app.use("/api/user-role", userRoleRoutes);
 
 const privilegeRoutes = require("./routes/privilege.route.js");
 app.use("/api/privilege", privilegeRoutes);
+
+const rolePrivilegeRoutes = require("./routes/rolePrivilege.routes.js");
+app.use("/api/role-privilege", rolePrivilegeRoutes);
 
 // app.get("/", function (req, res) {
 //   res.send("Hello from maadeha");
