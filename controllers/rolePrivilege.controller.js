@@ -39,20 +39,84 @@ async function createRolePrivilege(req, res) {
   }
 }
 
-async function getAllPrivileges(req, res) {
+async function getAllRolePrivileges(req, res) {
   try {
-    const mappings = await RolePrivilege.findAll({
+    const data = await RolePrivilege.findAll({
       include: [
         { model: Role, attributes: ["id", "name"] },
         { model: Privilege, attributes: ["id", "name"] },
       ],
     });
 
+    if (!data || data.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No privileges found." });
+    }
+
     res.status(200).json({
       success: true,
       message: "Privileges retrieved successfully.",
-      data: mappings,
+      data,
     });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function updateRolePrivilege(req, res) {
+  const { id } = req.params;
+  const { roleId, privilegeId } = req.body;
+
+  if (!roleId || !privilegeId) {
+    return res
+      .status(400)
+      .json({ message: "roleId and privilegeId are required." });
+  }
+
+  try {
+    const mapping = await RolePrivilege.findByPk(id);
+    if (!mapping)
+      return res
+        .status(404)
+        .json({ success: false, message: "Mapping not found." });
+
+    const role = await Role.findByPk(roleId);
+    const privilege = await Privilege.findByPk(privilegeId);
+
+    if (!role || !privilege) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Role or Privilege not found." });
+    }
+
+    mapping.roleId = roleId;
+    mapping.privilegeId = privilegeId;
+    await mapping.save();
+
+    res.json({
+      success: true,
+      message: "Role and its corresponding privilege updated successfully.",
+      data: mapping,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function deleteRolePrivilege(req, res) {
+  const { id } = req.params;
+
+  try {
+    const mapping = await RolePrivilege.findByPk(id);
+    if (!mapping)
+      return res
+        .status(404)
+        .json({ success: false, message: "Mapping not found." });
+
+    await mapping.destroy();
+
+    res.json({ success: true, message: "Mapping deleted successfully." });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -60,5 +124,7 @@ async function getAllPrivileges(req, res) {
 
 module.exports = {
   createRolePrivilege,
-  getAllPrivileges,
+  getAllRolePrivileges,
+  updateRolePrivilege,
+  deleteRolePrivilege,
 };
